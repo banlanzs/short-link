@@ -1,0 +1,7 @@
+# 本地开发 D1 绑定配置
+# 注意：这个文件用于本地开发，不会被提交到 Git
+
+[[d1_databases]]
+binding = "DB"
+database_name = "short_links"
+database_id = "local-db"
