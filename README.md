@@ -22,43 +22,43 @@
 
 ### 1. 安装依赖
 
-\`\`\`bash
+```
 npm install
-\`\`\`
+```
 
 ### 2. 创建 D1 数据库
 
-\`\`\`bash
+```
 npx wrangler d1 create short_links
-\`\`\`
+```
 
 复制返回的 `database_id`，更新 `wrangler.toml` 文件中的 `database_id` 字段。
 
 ### 3. 初始化数据库
 
-\`\`\`bash
+```
 npx wrangler d1 execute short_links --file=./schema.sql
-\`\`\`
+```
 
 ### 4. 本地开发
 
-\`\`\`bash
+```
 # 启动前端开发服务器
 npm run dev
 
 # 在另一个终端启动 Pages Functions 开发服务器
 npx wrangler pages dev dist --d1=DB
-\`\`\`
+```
 
 ### 5. 部署到 Cloudflare Pages
 
-\`\`\`bash
+```
 npm run deploy
-\`\`\`
+```
 
 ## 项目结构
 
-\`\`\`
+```
 short-links/
 ├── functions/              # Cloudflare Pages Functions
 │   ├── api/
@@ -77,13 +77,13 @@ short-links/
 ├── schema.sql             # D1 数据库 Schema
 ├── wrangler.toml          # Cloudflare 配置
 └── package.json
-\`\`\`
+```
 
 ## API 接口
 
 ### 创建短链接
 
-\`\`\`
+```
 POST /api/shorten
 Content-Type: application/json
 
@@ -91,22 +91,22 @@ Content-Type: application/json
   "url": "https://example.com/very/long/url",
   "slug": "custom-slug"  // 可选
 }
-\`\`\`
+```
 
 **响应**:
-\`\`\`json
+```json
 {
   "slug": "abc1234",
   "shortUrl": "https://your-domain.com/abc1234",
   "url": "https://example.com/very/long/url"
 }
-\`\`\`
+```
 
 ### 访问短链接
 
-\`\`\`
+```
 GET /{slug}
-\`\`\`
+```
 
 返回 301 重定向到目标 URL，带有缓存头。
 
@@ -139,21 +139,21 @@ GET /{slug}
 
 ### 查询所有链接
 
-\`\`\`bash
+```
 npx wrangler d1 execute short_links --command "SELECT * FROM links LIMIT 10"
-\`\`\`
+```
 
 ### 标记热门链接为 pinned
 
-\`\`\`bash
+```
 npx wrangler d1 execute short_links --command "UPDATE links SET pinned = 1 WHERE slug = 'your-slug'"
-\`\`\`
+```
 
 ### 重新导出静态文件
 
-\`\`\`bash
+```
 node scripts/export-static.js
-\`\`\`
+```
 
 ## 安全特性
 
