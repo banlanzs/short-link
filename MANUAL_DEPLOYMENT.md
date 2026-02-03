@@ -198,15 +198,30 @@ LIMIT 10;
 
 ## 本地开发
 
-由于不使用 wrangler，本地开发时 API 会使用 Mock 数据：
+如果需要本地测试完整功能（包括 API），请参考 [LOCAL_DEVELOPMENT.md](./LOCAL_DEVELOPMENT.md)。
 
+简单来说：
+```bash
+# 安装依赖
+npm install
+
+# 配置 wrangler.toml（从模板复制并填入 database_id）
+cp wrangler.toml.example wrangler.toml
+
+# 初始化本地数据库
+npx wrangler d1 execute short_links --local --file=./schema.sql
+
+# 启动完整开发环境
+npm run dev:functions
+```
+
+访问 http://localhost:8788
+
+**或者**，如果只想测试前端 UI：
 ```bash
 npm run dev
 ```
-
-访问 http://localhost:5173
-
-**注意**：本地开发时生成的短链接是模拟的，不会保存到数据库。要测试完整功能，请直接在 Cloudflare Pages 上测试。
+访问 http://localhost:5173（API 功能不可用）
 
 ---
 
@@ -214,16 +229,24 @@ npm run dev
 
 虽然不使用 wrangler 部署，但建议更新 `wrangler.toml` 中的 `database_id`，以便将来需要时可以使用：
 
+### 1. 复制模板文件
+```bash
+cp wrangler.toml.example wrangler.toml
+```
+
+### 2. 编辑配置文件
 ```toml
 name = "short-links"
 pages_build_output_dir = "dist"
-compatibility_date = "2024-01-01"
+compatibility_date = "2026-02-03"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "short_links"
 database_id = "你的-database-id-在这里"
 ```
+
+**注意**: `wrangler.toml` 包含敏感信息，已被添加到 `.gitignore`，不会提交到 Git。
 
 ---
 
