@@ -20,41 +20,124 @@
 
 ## 快速开始
 
-### 1. 安装依赖
+### 1. 克隆项目并安装依赖
 
-```
+```bash
+git clone https://github.com/banlanzs/short-link.git
+cd short-link
 npm install
 ```
 
-### 2. 创建 D1 数据库
+### 2. 配置 Cloudflare
 
+#### 2.1 登录 Cloudflare
+
+```bash
+npx wrangler login
 ```
+
+#### 2.2 创建 D1 数据库
+
+```bash
 npx wrangler d1 create short_links
 ```
 
-复制返回的 `database_id`，更新 `wrangler.toml` 文件中的 `database_id` 字段。
+复制返回的 `database_id`，例如：
+```
+database_id = "dc4195a8-83f1-4949-81f0-ace760512142"
+```
+
+#### 2.3 配置 wrangler.toml
+
+复制模板文件并填入你的 database_id：
+
+```bash
+cp wrangler.toml.example wrangler.toml
+```
+
+编辑 `wrangler.toml`，将 `<YOUR_D1_DATABASE_ID>` 替换为你的实际 database_id。
+
+**注意**: `wrangler.toml` 包含敏感信息，已被添加到 `.gitignore`，不会提交到 Git。
 
 ### 3. 初始化数据库
 
+#### 3.1 初始化本地数据库（用于开发）
+
+```bash
+npx wrangler d1 execute short_links --local --file=./schema.sql
 ```
-npx wrangler d1 execute short_links --file=./schema.sql
+
+#### 3.2 初始化远程数据库（用于生产）
+
+```bash
+npx wrangler d1 execute short_links --remote --file=./schema.sql
 ```
 
 ### 4. 本地开发
 
-```
-# 启动前端开发服务器
-npm run dev
+#### 方式一：仅前端开发（推荐用于 UI 调试）
 
-# 在另一个终端启动 Pages Functions 开发服务器
-npx wrangler pages dev dist --d1=DB
+```bash
+npm run dev
 ```
+
+访问 http://localhost:5173
+
+#### 方式二：完整开发环境（包含 Functions 和 D1）
+
+```bash
+npm run dev:functions
+```
+
+访问 http://localhost:8788
 
 ### 5. 部署到 Cloudflare Pages
 
-```
+#### 5.1 通过 GitHub 自动部署（推荐）
+
+1. **推送代码到 GitHub**:
+   ```bash
+   git add .
+   git commit -m "Initial deployment"
+   git push
+   ```
+
+2. **在 Cloudflare Dashboard 中创建 Pages 项目**:
+   - 访问 https://dash.cloudflare.com/
+   - 进入 **Workers & Pages**
+   - 点击 **Create application** → **Pages** → **Connect to Git**
+   - 选择你的 GitHub 仓库
+   - 配置构建设置：
+     - **构建命令**: `npm run build`
+     - **构建输出目录**: `dist`
+   - 点击 **Save and Deploy**
+
+3. **配置 D1 数据库绑定**:
+   - 在 Pages 项目中，进入 **Settings** → **Functions**
+   - 滚动到 **D1 database bindings**
+   - 点击 **Add binding**
+   - 填写：
+     - **Variable name**: `DB`
+     - **D1 database**: 选择 `short_links`
+   - 点击 **Save**
+
+4. **触发重新部署**:
+   - 回到 **Deployments** 标签
+   - 点击最新部署旁边的 **Retry deployment**
+
+#### 5.2 通过命令行部署
+
+```bash
 npm run deploy
 ```
+
+**注意**: 命令行部署后仍需在 Cloudflare Dashboard 中配置 D1 绑定（参考上面步骤 3）。
+
+### 6. 验证部署
+
+1. 访问你的 Pages URL（例如 `https://short-links.pages.dev`）
+2. 尝试创建一个短链接
+3. 测试重定向是否正常工作
 
 ## 项目结构
 
@@ -139,21 +222,29 @@ GET /{slug}
 
 ### 查询所有链接
 
+**本地数据库**:
+```bash
+npx wrangler d1 execute short_links --local --command "SELECT * FROM links LIMIT 10"
 ```
-npx wrangler d1 execute short_links --command "SELECT * FROM links LIMIT 10"
+
+**远程数据库**:
+```bash
+npx wrangler d1 execute short_links --remote --command "SELECT * FROM links LIMIT 10"
 ```
 
 ### 标记热门链接为 pinned
 
-```
-npx wrangler d1 execute short_links --command "UPDATE links SET pinned = 1 WHERE slug = 'your-slug'"
+```bash
+npx wrangler d1 execute short_links --remote --command "UPDATE links SET pinned = 1 WHERE slug = 'your-slug'"
 ```
 
 ### 重新导出静态文件
 
-```
+```bash
 node scripts/export-static.js
 ```
+
+**注意**: 静态导出功能在本地开发时需要 wrangler CLI 可用。在 Cloudflare Pages 构建环境中会自动跳过。
 
 ## 安全特性
 
@@ -161,6 +252,45 @@ node scripts/export-static.js
 - Slug 格式验证
 - HTML 转义防止 XSS
 - 数据库 UNIQUE 约束防止冲突
+- 敏感配置文件（wrangler.toml）不提交到 Git
+
+## 常见问题
+
+### Q: 本地开发时出现 "no such table: links" 错误？
+
+**A**: 需要初始化本地数据库：
+```bash
+npx wrangler d1 execute short_links --local --file=./schema.sql
+```
+
+### Q: 部署后 API 返回 500 错误？
+
+**A**: 检查是否配置了 D1 数据库绑定：
+1. 进入 Cloudflare Dashboard → Workers & Pages → 你的项目
+2. Settings → Functions → D1 database bindings
+3. 添加绑定：变量名 `DB`，数据库选择 `short_links`
+
+### Q: 如何查看生产环境的数据库内容？
+
+**A**: 使用 `--remote` 参数：
+```bash
+npx wrangler d1 execute short_links --remote --command "SELECT * FROM links"
+```
+
+### Q: wrangler.toml 文件丢失了怎么办？
+
+**A**: 从模板文件复制并填入你的 database_id：
+```bash
+cp wrangler.toml.example wrangler.toml
+# 编辑 wrangler.toml，填入你的 database_id
+```
+
+### Q: 如何自定义域名？
+
+**A**: 在 Cloudflare Pages 项目设置中：
+1. 进入 **Custom domains**
+2. 点击 **Set up a custom domain**
+3. 输入你的域名并按照提示配置 DNS
 
 ## 许可证
 
