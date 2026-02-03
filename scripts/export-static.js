@@ -50,8 +50,9 @@ function queryPinnedLinks() {
     if (!payload?.[0]?.results) return []
     return payload[0].results
   } catch (error) {
-    console.error('Failed to export static links:', error)
-    process.exit(1)
+    // 在 Cloudflare Pages 构建环境中，wrangler 不可用，返回空数组而不是退出
+    console.log('Wrangler not available in build environment, skipping static export')
+    return []
   }
 }
 

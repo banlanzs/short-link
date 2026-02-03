@@ -30,10 +30,17 @@ function isValidSlug(value: unknown): value is string {
 export async function onRequestPost(context: EventContext<Env, string, Record<string, unknown>>) {
   const { request, env } = context
 
+  // 调试：检查 DB 绑定
+  if (!env.DB) {
+    console.error('DB binding not found in env:', Object.keys(env))
+    return Response.json({ error: 'Database not configured' }, { status: 500 })
+  }
+
   let body: { url?: string; slug?: string } = {}
   try {
     body = await request.json()
-  } catch {
+  } catch (error) {
+    console.error('JSON parse error:', error)
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
@@ -59,6 +66,7 @@ export async function onRequestPost(context: EventContext<Env, string, Record<st
         .run()
       break
     } catch (error) {
+      console.error('Database error:', error)
       const message = error instanceof Error ? error.message : String(error)
       if (message.includes('UNIQUE constraint failed')) {
         if (customSlug) {
@@ -71,7 +79,7 @@ export async function onRequestPost(context: EventContext<Env, string, Record<st
         slug = generateSlug()
         continue
       }
-      return Response.json({ error: 'Database error' }, { status: 500 })
+      return Response.json({ error: 'Database error', details: message }, { status: 500 })
     }
   }
 

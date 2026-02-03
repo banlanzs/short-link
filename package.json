@@ -5,16 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:functions": "npm run build:frontend && wrangler pages dev dist --d1=DB --port=8788",
+    "dev:functions": "npm run build:frontend && node scripts/init-local-db.js && wrangler pages dev dist --port=8788",
     "build": "tsc && vite build && node scripts/export-static.js",
     "build:frontend": "tsc && vite build",
     "preview": "vite preview",
     "deploy": "npm run build && npx wrangler pages deploy dist"
   },
   "dependencies": {
+    "nanoid": "^5.0.8",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "nanoid": "^5.0.8"
+    "wrangler": "^4.62.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250110.0",

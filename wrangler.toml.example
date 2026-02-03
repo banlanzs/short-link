@@ -1,0 +1,8 @@
+name = "short-links"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-02-03"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "short_links"
+database_id = "<YOUR_D1_DATABASE_ID>"
