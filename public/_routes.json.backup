@@ -21,22 +21,7 @@
     "/*.jpeg",
     "/*.gif",
     "/*.webp",
-    "/*.webmanifest",
-    "/robots.txt",
-    "/sitemap.xml",
-    "/favicon.ico",
-    "/.well-known/*",
-    "/admin*",
-    "/login*",
-    "/wp-*",
-    "/.env*",
-    "/config.*",
-    "/phpmyadmin*",
-    "/mysql*",
-    "/database*",
-    "/backup*",
-    "/test*",
-    "/demo*"
+    "/*.webmanifest"
   ]
 }
 
