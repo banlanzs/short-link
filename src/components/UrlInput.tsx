@@ -10,6 +10,7 @@ interface ShortenResponse {
 
 function UrlInput() {
   const [url, setUrl] = useState('')
+  const [customSlug, setCustomSlug] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState<ShortenResponse | null>(null)
@@ -24,6 +25,12 @@ function UrlInput() {
       return
     }
 
+    // 验证自定义 slug 格式（如果提供）
+    if (customSlug.trim() && !/^[A-Za-z0-9_-]{3,64}$/.test(customSlug.trim())) {
+      setError('自定义短码只能包含字母、数字、下划线和连字符，长度 3-64 位')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -31,15 +38,20 @@ function UrlInput() {
 
       // 开发环境使用 Mock API
       if (isDevelopment) {
-        data = await mockShorten(url.trim())
+        data = await mockShorten(url.trim(), customSlug.trim() || undefined)
       } else {
         // 生产环境使用真实 API
+        const requestBody: { url: string; slug?: string } = { url: url.trim() }
+        if (customSlug.trim()) {
+          requestBody.slug = customSlug.trim()
+        }
+
         const response = await fetch('/api/shorten', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ url: url.trim() }),
+          body: JSON.stringify(requestBody),
         })
 
         data = await response.json() as ShortenResponse
@@ -57,6 +69,7 @@ function UrlInput() {
       localStorage.setItem('recentLinks', JSON.stringify(history.slice(0, 5)))
 
       setUrl('')
+      setCustomSlug('')
     } catch (err) {
       setError('网络错误，请重试')
     } finally {
@@ -84,6 +97,24 @@ function UrlInput() {
             } focus:ring-2 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
             disabled={loading}
           />
+        </div>
+
+        <div>
+          <label htmlFor="customSlug" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            自定义短码（可选）
+          </label>
+          <input
+            type="text"
+            id="customSlug"
+            value={customSlug}
+            onChange={(e) => setCustomSlug(e.target.value)}
+            placeholder="my-custom-link"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:ring-2 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            disabled={loading}
+          />
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            只能包含字母、数字、下划线和连字符，长度 3-64 位
+          </p>
           {error && (
             <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>
           )}

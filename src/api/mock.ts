@@ -1,7 +1,7 @@
 // Mock API for local development
 // 用于本地开发时模拟 API 响应
 
-export async function mockShorten(url: string): Promise<{
+export async function mockShorten(url: string, customSlug?: string): Promise<{
   slug: string
   shortUrl: string
   url: string
@@ -9,8 +9,8 @@ export async function mockShorten(url: string): Promise<{
   // 模拟网络延迟
   await new Promise(resolve => setTimeout(resolve, 500))
 
-  // 生成随机 slug
-  const slug = Math.random().toString(36).substring(2, 9)
+  // 使用自定义 slug 或生成随机 slug
+  const slug = customSlug || Math.random().toString(36).substring(2, 9)
 
   return {
     slug,
