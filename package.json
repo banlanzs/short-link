@@ -6,12 +6,15 @@
   "scripts": {
     "dev": "vite",
     "dev:functions": "npm run build:frontend && node scripts/init-local-db.js && wrangler pages dev dist --port=8788",
+    "dev:vercel": "vercel dev",
     "build": "tsc && vite build && node scripts/export-static.js",
     "build:frontend": "tsc && vite build",
+    "build:vercel": "tsc && vite build && node scripts/export-vercel.js",
     "preview": "vite preview",
     "deploy": "npm run build && npx wrangler pages deploy dist"
   },
   "dependencies": {
+    "@vercel/kv": "^3.0.0",
     "nanoid": "^5.0.8",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -21,6 +24,7 @@
     "@cloudflare/workers-types": "^4.20250110.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
+    "@vercel/node": "^3.2.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",

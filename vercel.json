@@ -1,0 +1,23 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/shorten",
+      "destination": "/api/vercel-shorten"
+    },
+    {
+      "source": "/:slug",
+      "destination": "/api/vercel-redirect"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/s/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}

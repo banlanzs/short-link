@@ -1,0 +1,15 @@
+# Cloudflare 专用文件
+functions/
+wrangler.toml
+wrangler.toml.example
+scripts/export-static.js
+scripts/init-local-db.js
+.wrangler/
+
+# 开发文件
+node_modules/
+.env
+.env.local
+
+# 构建产物
+.vercel/
